@@ -47,19 +47,30 @@ WHERE ventas.fechaventa = '2020-01-17 00:00:00' and compras.fechaEntrega='2021-0
 # 4. Dado un rango de fechas, mostrar mes a mes el total de compras y el total de ventas. 
 # El formato deberá ser: més, total de compras, total de ventas.
 
-SELECT monthname(fechaEntrega) as 'mes', count(estadoCompra) as 'TotalCompras'
+drop table IF EXISTS punto4;
+create temporary table punto4(
+        mes VARCHAR(20) NULL,
+        CantidadCompras INT NULL DEFAULT '0',
+        CantidadVentas INT NULL DEFAULT '0')
+ENGINE = InnoDB;
+
+insert into punto4(mes,cantidadCompras) 
+(SELECT monthname(fechaEntrega) as 'mes', count(estadoCompra) as 'TotalCompras'
 FROM compras JOIN lineascompra
 ON compras.idcompras=lineascompra.compras_idcompras
-WHERE compras.estadoCompra='F' AND (fechaEntrega BETWEEN '2020-02-02 00:00:00' AND '2020-12-12 00:00:00')
+WHERE compras.estadoCompra='F' AND (fechaEntrega BETWEEN '2020-01-17 00:00:00' AND '2020-12-12 00:00:00')
 GROUP BY mes
+ORDER BY TotalCompras);
 
-UNION
-
-SELECT monthname(fechaVenta) as 'mes', count(estadoVenta) as 'TotalVentas'
+insert into punto4(mes,cantidadVentas) 
+(SELECT monthname(fechaVenta) as 'mes', count(estadoVenta) as 'TotalVentas'
 FROM ventas JOIN lineasventa
 ON ventas.idventas=lineasventa.ventas_idventas
 WHERE ventas.estadoVenta='F' AND (fechaVenta BETWEEN '2020-01-17 00:00:00' AND '2020-01-19 00:00:00')
-GROUP BY mes;
+GROUP BY mes);
+
+SELECT * FROM punto4
+order by mes;
 
 
 #---------------------------------------------------------------------------------------------
@@ -137,8 +148,8 @@ INSERT INTO `lbd202103`.`copiaarticulos` (`idArticulos`, `articulo`, `color`, `g
 
 SELECT idarticulos, articulo, color, marca,JSON_EXTRACT(DetalleJSON, '$.Detalles') AS Detalle FROM copiaarticulos;  #mostramos la tabla
 
-#CONTINUARA...
-
+#CONTINUA
+SELECT * FROM compras;
 
 # 10: Realizar una vista que considere importante para su modelo. También dejar escrito el enunciado de la misma.
  # "EMPLEADOS QUE SE ENCUENTREN ACTIVOS Y HAYAN REALIZADO VENTAS, CON UN RANKING POR VENTAS REALIZADAS HISTORICO"
